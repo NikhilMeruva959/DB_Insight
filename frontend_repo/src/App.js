@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import StatusBar from "./components/StatusBar";
+import DisplayTable from "./components/DisplayTable";
 
 import { useSelector } from "react-redux";
-import { returnState } from "./state/db_name/DBSlice";
+import { selectDbName } from "./state/db_name/DBSlice";
 
 function App() {
   const [dbNames, setDbNames] = useState([]);
   const [schemaNames, setSchemaNames] = useState([]);
   const [schemaCount, setSchemaCount] = useState(0);
+  const dbVar = useSelector(selectDbName);
 
   useEffect(() => {
     // Fetch the database name from the backend
@@ -37,22 +39,22 @@ function App() {
       })
       .catch((error) => console.error("There was an error!", error));
   }, []);
-
-  // const stateVar = useSelector(returnState);
+  console.log(dbVar);
 
   return (
     <>
       {/* <LoginPage /> */}
       <Navbar />
       <StatusBar />
-      <div>
+      {dbVar === "db_insight" && <DisplayTable />}
+      {/* <div>
         <p>DB Names: {}</p>
         <p>Schema Count: {schemaCount}</p>
         <p>Schema Names: </p>
         {schemaNames.map((schema, index) => (
           <li key={index}>{schema.schema_name}</li>
         ))}
-      </div>
+      </div> */}
     </>
   );
 }
