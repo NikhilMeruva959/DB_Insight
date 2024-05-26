@@ -14,3 +14,11 @@ VALUES
   ('Toyota', 'Celica', 1975);
 
 SELECT * FROM cars;
+
+SELECT COUNT(*) FROM cars;
+
+select count(*)
+from information_schema.tables
+where table_schema = 'public';
+
+

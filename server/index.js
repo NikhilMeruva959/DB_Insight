@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 const port = 3002;
 
+app.use(express.json());
 app.use(cors());
 
 const pool = new Pool({
@@ -76,6 +77,56 @@ app.get("/get-config-db-info/:dbName", async (req, res) => {
   } catch (error) {
     console.error("Error fetching config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    pool.end(); // Close the pool after the query
+  }
+});
+
+app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
+  const dbName = req.params.dbName;
+
+  const pool = new Pool({
+    user: "nikmeruva",
+    host: "localhost",
+    database: dbName, // Use the database name from the request parameter
+    password: process.env.password,
+    port: process.env.port,
+  });
+
+  try {
+    const queryResult = await pool.query("SELECT * FROM conf_db_query");
+    console.log("Config Info DB Info:", queryResult.rows);
+    const configInfoDbInfoArray = queryResult.rows;
+    res.json({ configInfoDbInfoArray });
+  } catch (error) {
+    console.error("Error fetching conf_db_query", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    pool.end(); // Close the pool after the query
+  }
+});
+
+app.post("/tables/:connectionString/run-query", async (req, res) => {
+  const connectionString = decodeURIComponent(req.params.connectionString);
+  console.log(connectionString);
+  console.log(req.body);
+  const { sql_query } = req.body;
+
+  console.log("Received SQL Query:", sql_query); // Debug log
+
+  const pool = new Pool({
+    connectionString: connectionString,
+  });
+
+  try {
+    // Execute the SQL query passed in the request body
+    const result = await pool.query(sql_query);
+    res.json({ tableData: result.rows });
+  } catch (error) {
+    console.error("Error executing query", error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   } finally {
     pool.end(); // Close the pool after the query
   }

@@ -7,9 +7,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useSelector } from "react-redux";
 import { selectDbName } from "../state/db_name/DBSlice";
 import CreateDBForm from "./CreateDBForm";
+import { useDispatch, useSelector } from "react-redux";
+import { changeState, changeInfoState } from "../state/sub_db_name/SubDBSlice";
+import Link from "@mui/material/Link"; // Import Link component
+import { selectSubDBName } from "../state/sub_db_name/SubDBSlice";
+import DisplaySubTable from "./DisplaySubTable";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -32,8 +36,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function DisplayTable() {
   const [configDbInfo, setConfigDbInfo] = useState([]);
-  const [createDBInfo, setCreateDBInfo] = useState([]);
+  const [selectedSubStateStr, setSelectedSubStateStr] = useState("");
 
+  const dispatch = useDispatch();
+  const subDBVar = useSelector(selectSubDBName);
   const dbVar = useSelector(selectDbName);
 
   useEffect(() => {
@@ -47,49 +53,72 @@ export default function DisplayTable() {
       .catch((error) => console.error("There was an error!", error));
   }, [dbVar]);
 
-  return (
-    <>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 700 }} aria-label="customized table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>Config DB ID</StyledTableCell>
-              <StyledTableCell>DB Name</StyledTableCell>
-              <StyledTableCell>DB Type</StyledTableCell>
-              <StyledTableCell>Environment</StyledTableCell>
-              <StyledTableCell>DB User ID</StyledTableCell>
-              <StyledTableCell>DB Password</StyledTableCell>
-              <StyledTableCell>Host ID</StyledTableCell>
-              <StyledTableCell>Port ID</StyledTableCell>
-              <StyledTableCell>Connection String</StyledTableCell>
-              <StyledTableCell>Team Name</StyledTableCell>
-              <StyledTableCell>Team POC</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {configDbInfo.map((row) => (
-              <StyledTableRow key={row.config_db_id}>
-                <StyledTableCell>{row.config_db_id}</StyledTableCell>
-                <StyledTableCell>{row.db_name}</StyledTableCell>
-                <StyledTableCell>{row.db_type}</StyledTableCell>
-                <StyledTableCell>{row.enviornment}</StyledTableCell>
-                <StyledTableCell>{row.db_user_id}</StyledTableCell>
-                <StyledTableCell>{row.db_password}</StyledTableCell>
-                <StyledTableCell>{row.host_id}</StyledTableCell>
-                <StyledTableCell>{row.port_id}</StyledTableCell>
-                <StyledTableCell>{row.connection_str}</StyledTableCell>
-                <StyledTableCell>{row.team_name}</StyledTableCell>
-                <StyledTableCell>{row.team_poc}</StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+  const handleDbNameClick = (row) => {
+    dispatch(changeState({ sub_db_name: row.db_name }));
+    console.log(row.connection_str);
+    dispatch(changeInfoState({ sub_db_info: row.connection_str }));
+    // setSelectedSubStateStr(row.connection_str);
+  };
 
-      <h3>CRUD Operations</h3>
-      <CreateDBForm />
-      <h5>Update DB</h5>
-      <h5>Delete DB</h5>
-    </>
-  );
+  if (subDBVar === "") {
+    return (
+      <>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>Config DB ID</StyledTableCell>
+                <StyledTableCell>DB Name</StyledTableCell>
+                <StyledTableCell>DB Type</StyledTableCell>
+                <StyledTableCell>Environment</StyledTableCell>
+                <StyledTableCell>DB User ID</StyledTableCell>
+                <StyledTableCell>DB Password</StyledTableCell>
+                <StyledTableCell>Host ID</StyledTableCell>
+                <StyledTableCell>Port ID</StyledTableCell>
+                <StyledTableCell>Connection String</StyledTableCell>
+                <StyledTableCell>Team Name</StyledTableCell>
+                <StyledTableCell>Team POC</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {configDbInfo.map((row) => (
+                <StyledTableRow key={row.config_db_id}>
+                  <StyledTableCell>{row.config_db_id}</StyledTableCell>
+                  <StyledTableCell>
+                    <Link
+                      component="button"
+                      variant="body2"
+                      onClick={() => handleDbNameClick(row)}
+                    >
+                      {row.db_name}
+                    </Link>
+                  </StyledTableCell>
+                  <StyledTableCell>{row.db_type}</StyledTableCell>
+                  <StyledTableCell>{row.enviornment}</StyledTableCell>
+                  <StyledTableCell>{row.db_user_id}</StyledTableCell>
+                  <StyledTableCell>{row.db_password}</StyledTableCell>
+                  <StyledTableCell>{row.host_id}</StyledTableCell>
+                  <StyledTableCell>{row.port_id}</StyledTableCell>
+                  <StyledTableCell>{row.connection_str}</StyledTableCell>
+                  <StyledTableCell>{row.team_name}</StyledTableCell>
+                  <StyledTableCell>{row.team_poc}</StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <h3>CRUD Operations</h3>
+        <CreateDBForm />
+        <h5>Update DB</h5>
+        <h5>Delete DB</h5>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <DisplaySubTable />
+      </>
+    );
+  }
 }
