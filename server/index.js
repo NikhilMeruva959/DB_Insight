@@ -1,6 +1,8 @@
 const express = require("express");
-const { Pool } = require("pg");
+const { Pool: PostgresPool } = require("pg");
 const cors = require("cors");
+const mysql = require("mysql2");
+const url = require("url");
 
 const app = express();
 const port = 3002;
@@ -8,17 +10,17 @@ const port = 3002;
 app.use(express.json());
 app.use(cors());
 
-const pool = new Pool({
+const postgresPool = new PostgresPool({
   user: "nikmeruva",
   host: "localhost",
   database: "db_insight",
-  password: process.env.password,
-  port: process.env.port,
+  password: process.env.PASSWORD,
+  port: process.env.PORT,
 });
 
 app.get("/get-db-names", async (req, res) => {
   try {
-    const queryResult = await pool.query(
+    const queryResult = await postgresPool.query(
       "SELECT datname FROM pg_database WHERE datistemplate = false;"
     );
     // Wrap each database name in an object with 'db_name' key
@@ -32,7 +34,7 @@ app.get("/get-db-names", async (req, res) => {
 
 app.get("/get-schema-number", async (req, res) => {
   try {
-    const queryResult = await pool.query(
+    const queryResult = await postgresPool.query(
       "SELECT schema_name FROM information_schema.schemata"
     );
     console.log("Schema names:", queryResult.rowCount);
@@ -46,7 +48,7 @@ app.get("/get-schema-number", async (req, res) => {
 
 app.get("/get-schema-names", async (req, res) => {
   try {
-    const queryResult = await pool.query(
+    const queryResult = await postgresPool.query(
       "SELECT schema_name FROM information_schema.schemata"
     );
     console.log("Schema names:", queryResult.rows);
@@ -61,12 +63,12 @@ app.get("/get-schema-names", async (req, res) => {
 app.get("/get-config-db-info/:dbName", async (req, res) => {
   const dbName = req.params.dbName;
 
-  const pool = new Pool({
+  const pool = new PostgresPool({
     user: "nikmeruva",
     host: "localhost",
     database: dbName, // Use the database name from the request parameter
-    password: process.env.password,
-    port: process.env.port,
+    password: process.env.PASSWORD,
+    port: process.env.PORT,
   });
 
   try {
@@ -85,12 +87,12 @@ app.get("/get-config-db-info/:dbName", async (req, res) => {
 app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
   const dbName = req.params.dbName;
 
-  const pool = new Pool({
+  const pool = new PostgresPool({
     user: "nikmeruva",
     host: "localhost",
     database: dbName, // Use the database name from the request parameter
-    password: process.env.password,
-    port: process.env.port,
+    password: process.env.PASSWORD,
+    port: process.env.PORT,
   });
 
   try {
@@ -108,27 +110,84 @@ app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
 
 app.post("/tables/:connectionString/run-query", async (req, res) => {
   const connectionString = decodeURIComponent(req.params.connectionString);
-  console.log(connectionString);
-  console.log(req.body);
   const { sql_query } = req.body;
 
   console.log("Received SQL Query:", sql_query); // Debug log
 
-  const pool = new Pool({
-    connectionString: connectionString,
-  });
+  // Determine the database type from the connection string
+  const parsedUrl = new url.URL(connectionString);
+  const protocol = parsedUrl.protocol;
 
-  try {
-    // Execute the SQL query passed in the request body
-    const result = await pool.query(sql_query);
-    res.json({ tableData: result.rows });
-  } catch (error) {
-    console.error("Error executing query", error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
-  } finally {
-    pool.end(); // Close the pool after the query
+  if (protocol.startsWith("mysql")) {
+    // MySQL connection
+    const dbConfig = {
+      host: parsedUrl.hostname,
+      port: parsedUrl.port,
+      user: parsedUrl.username,
+      password: parsedUrl.password,
+      database: parsedUrl.pathname.slice(1), // Remove leading slash
+    };
+
+    console.log(dbConfig);
+
+    const pool = mysql.createPool(dbConfig);
+
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error connecting to the MySQL database:", err);
+        return res.status(500).json({
+          error: "Error connecting to the database",
+          details: err.message,
+        });
+      } else {
+        console.log("Connected to the MySQL database");
+        connection.release();
+      }
+    });
+
+    pool.query(sql_query, (error, results) => {
+      if (error) {
+        console.error("Error executing query", error);
+        return res
+          .status(500)
+          .json({ error: "Internal Server Error", details: error.message });
+      }
+      res.json({ tableData: results });
+    });
+  } else if (protocol.startsWith("postgres")) {
+    // PostgreSQL connection
+    const pool = new PostgresPool({
+      connectionString: connectionString,
+    });
+
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query(sql_query);
+        res.json({ tableData: result.rows });
+      } catch (queryError) {
+        console.error("Error executing query", queryError);
+        res.status(500).json({
+          error: "Internal Server Error",
+          details: queryError.message,
+        });
+      } finally {
+        client.release();
+      }
+    } catch (connectionError) {
+      console.error(
+        "Error connecting to the PostgreSQL database:",
+        connectionError
+      );
+      res.status(500).json({
+        error: "Error connecting to the database",
+        details: connectionError.message,
+      });
+    } finally {
+      pool.end(); // Close the pool after the query
+    }
+  } else {
+    res.status(400).json({ error: "Unsupported database type" });
   }
 });
 
@@ -155,7 +214,7 @@ app.post("/add-config-db-info", async (req, res) => {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
   try {
-    await pool.query(query, [
+    await postgresPool.query(query, [
       db_name,
       db_type,
       enviornment,

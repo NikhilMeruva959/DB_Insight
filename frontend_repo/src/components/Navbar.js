@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import Autocomplete from "./Autocomplete";
+import LogoImage from "../assets/MainLogo.webp";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -59,29 +60,32 @@ export default function ButtonAppBar() {
   const [value, setValue] = useState(null);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          ></IconButton>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{
-              flexGrow: 1,
-              display: { xs: "none", sm: "flex" },
-              justifyContent: "center", // Center the title text
-            }}
-          >
-            PostgresSQL Tester
-          </Typography>
-          {/* <Search>
+    <>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2 }}
+            ></IconButton>
+            <img src={LogoImage} alt="Logo" width="75" height="75" />
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                flexGrow: 1,
+                display: { xs: "none", sm: "flex" },
+                marginLeft: "15px",
+                // justifyContent: "center", // Center the title text
+              }}
+            >
+              Database Insight
+            </Typography>
+            {/* <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
@@ -90,10 +94,11 @@ export default function ButtonAppBar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search> */}
-          <Autocomplete />
-          <Button color="inherit">Nikhil M.</Button>
-        </Toolbar>
-      </AppBar>
-    </Box>
+            <Autocomplete />
+            <Button color="inherit">Nikhil M.</Button>
+          </Toolbar>
+        </AppBar>
+      </Box>
+    </>
   );
 }

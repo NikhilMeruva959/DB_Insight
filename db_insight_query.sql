@@ -52,6 +52,17 @@ VALUES
     ('billing_db', 'MySQL', 'dev', 'bill_user', 'billpass', 'billing_host', '3306', 'mysql://bill_user:billpass@billing_host:3306/billing_db', 'billing', 'Ivy J.'),
     ('development_db', 'postgresql', 'prod', 'dev_user', 'devpass', 'development_host', '5432', 'postgresql://dev_user:devpass@development_host:5432/development_db', 'development', 'Jack K.');
 
+INSERT INTO public.config_db_info(
+	db_name, db_type, enviornment, db_user_id, db_password, host_id, port_id, connection_str, team_name, team_poc)
+	VALUES ('students', 'mysql', 'dev', 'root@localhost', 'Verisk67', 'localhost', '3306', 'mysql://mysql:@localhost:3306/students', 'SBU', 'Nik M.');
+
+INSERT INTO public.config_db_info(
+	db_name, db_type, enviornment, db_user_id, db_password, host_id, port_id, connection_str, team_name, team_poc)
+	VALUES ('students', 'mysql', 'dev', 'root@localhost', 'Verisk67', 'localhost', '3306', 'mysql://mysql:Verisk67@localhost:3306/students', 'SBU', 'Nik M.');
+
+INSERT INTO public.config_db_info(
+	db_name, db_type, enviornment, db_user_id, db_password, host_id, port_id, connection_str, team_name, team_poc)
+	VALUES ('students', 'mysql', 'dev', 'root@localhost', 'Verisk67', 'localhost', '3306', 'mysql://root@localhost:Verisk67@localhost:3306/students', 'SBU', 'Nik M.');
 
 -- query
 SELECT * from conf_db_query
@@ -66,6 +77,13 @@ INSERT INTO public.conf_db_query(
 	menu_action, menu_desc, sql_query, config_db_id)
 	VALUES ('num_tables', 'get the number of tables', 'select count(*) from information_schema.tables where table_schema = ''public'';', 1);
 
+INSERT INTO public.conf_db_query(
+	menu_action, menu_desc, sql_query, config_db_id)
+	VALUES ('student_count', 'get student count of table', 'SELECT COUNT(*) FROM BUS115;', 13);
+
+INSERT INTO public.conf_db_query(
+	menu_action, menu_desc, sql_query, config_db_id)
+	VALUES ('student_count', 'get student count of table', 'SELECT COUNT(*) FROM BUS115;', 14);
 
 
 

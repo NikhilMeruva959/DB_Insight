@@ -86,7 +86,7 @@ export default function FreeSoloCreateOptionDialog() {
           return option.db_name;
         }}
         renderOption={(props, option) => <li {...props}>{option.db_name}</li>}
-        sx={{ width: 300 }}
+        sx={{ width: 300, marginRight: "20px" }}
         freeSolo
         renderInput={(params) => (
           <TextField {...params} label="Database Name/Atlas" />

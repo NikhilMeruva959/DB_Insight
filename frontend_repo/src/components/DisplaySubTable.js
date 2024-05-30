@@ -32,7 +32,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function DisplaySubTable() {
-  const [tableData, setTableData] = useState({});
+  const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const subStr = useSelector(selectSubDBInfo);
   const dbVar = useSelector(selectDbName);
@@ -79,7 +79,14 @@ export default function DisplaySubTable() {
       });
   };
 
-  console.log(tableData);
+  const getCountValue = (item) => {
+    if (item["COUNT(*)"] !== undefined) {
+      return item["COUNT(*)"];
+    } else if (item.count !== undefined) {
+      return parseInt(item.count, 10);
+    }
+    return null;
+  };
 
   return (
     <TableContainer component={Paper}>
@@ -117,7 +124,9 @@ export default function DisplaySubTable() {
                 <StyledTableRow>
                   <TableBody>
                     {tableData.map((item, index) => (
-                      <StyledTableRow key={index}>{item.count}</StyledTableRow>
+                      <StyledTableRow key={index}>
+                        <StyledTableCell>{getCountValue(item)}</StyledTableCell>
+                      </StyledTableRow>
                     ))}
                   </TableBody>
                 </StyledTableRow>
