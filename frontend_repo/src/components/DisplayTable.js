@@ -10,7 +10,11 @@ import Paper from "@mui/material/Paper";
 import { selectDbName } from "../state/db_name/DBSlice";
 import CreateDBForm from "./CreateDBForm";
 import { useDispatch, useSelector } from "react-redux";
-import { changeState, changeInfoState } from "../state/sub_db_name/SubDBSlice";
+import {
+  changeState,
+  changeInfoState,
+  changeIdState,
+} from "../state/sub_db_name/SubDBSlice";
 import Link from "@mui/material/Link"; // Import Link component
 import { selectSubDBName } from "../state/sub_db_name/SubDBSlice";
 import DisplaySubTable from "./DisplaySubTable";
@@ -37,7 +41,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export default function DisplayTable() {
   const [configDbInfo, setConfigDbInfo] = useState([]);
   const [selectedSubStateStr, setSelectedSubStateStr] = useState("");
-
+  const [confId, setConfId] = useState("");
   const dispatch = useDispatch();
   const subDBVar = useSelector(selectSubDBName);
   const dbVar = useSelector(selectDbName);
@@ -57,6 +61,8 @@ export default function DisplayTable() {
     dispatch(changeState({ sub_db_name: row.db_name }));
     console.log(row.connection_str);
     dispatch(changeInfoState({ sub_db_info: row.connection_str }));
+    dispatch(changeIdState({ sub_db_id: row.config_db_id }));
+    setConfId(row.config_db_id);
     // setSelectedSubStateStr(row.connection_str);
   };
 
@@ -117,7 +123,7 @@ export default function DisplayTable() {
   } else {
     return (
       <>
-        <DisplaySubTable />
+        <DisplaySubTable confId={confId} />
       </>
     );
   }

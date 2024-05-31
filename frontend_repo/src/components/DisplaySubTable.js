@@ -8,7 +8,10 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useSelector } from "react-redux";
-import { selectSubDBInfo } from "../state/sub_db_name/SubDBSlice";
+import {
+  selectSubDBInfo,
+  selectSubDBId,
+} from "../state/sub_db_name/SubDBSlice";
 import { selectDbName } from "../state/db_name/DBSlice";
 import { Button } from "@mui/material";
 
@@ -31,11 +34,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function DisplaySubTable() {
+export default function DisplaySubTable({ confId }) {
+  const castedConfId = Number(confId);
+
   const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const subStr = useSelector(selectSubDBInfo);
   const dbVar = useSelector(selectDbName);
+  const db_id = useSelector(selectSubDBId);
   const [configDbInfo, setConfigDbInfo] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
 
@@ -88,6 +94,10 @@ export default function DisplaySubTable() {
     return null;
   };
 
+  const filteredConfigDbInfo = configDbInfo.filter(
+    (row) => row.config_db_id === castedConfId
+  );
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
@@ -102,7 +112,7 @@ export default function DisplaySubTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {configDbInfo.map((row) => (
+          {filteredConfigDbInfo.map((row) => (
             <React.Fragment key={row.config_query_id}>
               <StyledTableRow>
                 <StyledTableCell>{row.config_query_id}</StyledTableCell>

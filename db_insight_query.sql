@@ -64,6 +64,10 @@ INSERT INTO public.config_db_info(
 	db_name, db_type, enviornment, db_user_id, db_password, host_id, port_id, connection_str, team_name, team_poc)
 	VALUES ('students', 'mysql', 'dev', 'root@localhost', 'Verisk67', 'localhost', '3306', 'mysql://root@localhost:Verisk67@localhost:3306/students', 'SBU', 'Nik M.');
 
+INSERT INTO public.config_db_info(
+	db_name, db_type, enviornment, db_user_id, db_password, host_id, port_id, connection_str, team_name, team_poc)
+	VALUES ('students', 'mysql', 'dev', 'root', 'Verisk67', 'localhost', '3306', 'mysql://root:Verisk67@localhost:3306/students', 'SBU', 'Nik M.');
+
 -- query
 SELECT * from conf_db_query
 	
@@ -85,8 +89,15 @@ INSERT INTO public.conf_db_query(
 	menu_action, menu_desc, sql_query, config_db_id)
 	VALUES ('student_count', 'get student count of table', 'SELECT COUNT(*) FROM BUS115;', 14);
 
+INSERT INTO public.conf_db_query(
+	menu_action, menu_desc, sql_query, config_db_id)
+	VALUES ('student_count', 'get student count of table', 'SELECT COUNT(*) FROM BUS115;', 15);
 
+INSERT INTO public.conf_db_query(
+	menu_action, menu_desc, sql_query, config_db_id)
+	VALUES ('student_count', 'get student count of table', 'SELECT COUNT(*) FROM BUS115;', 16);
 
+DELETE FROM public.conf_db_query WHERE config_db_id = 15;
 
 
 
