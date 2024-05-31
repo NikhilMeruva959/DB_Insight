@@ -1,0 +1,186 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DataBase Insight API",
+    "description": "There are over 5000 databases in an org across the globe. Create an Application for the DBA team to automate some of the routine tasks by providing Self service features like - creating user id, data refresh, create db requests. The application will also store database related details in one centralized app to help DBA Team to catalog all database info in the centralized app and use it for backup audits, user access audit and much more.",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3002",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/get-db-names": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-schema-number": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-schema-names": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-config-db-info/{dbName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "dbName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-config-db-info-insight/{dbName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "dbName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tables/{connectionString}/run-query": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "connectionString",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sql_query": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/add-config-db-info": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "db_name": {
+                  "example": "any"
+                },
+                "db_type": {
+                  "example": "any"
+                },
+                "enviornment": {
+                  "example": "any"
+                },
+                "db_user_id": {
+                  "example": "any"
+                },
+                "db_password": {
+                  "example": "any"
+                },
+                "host_id": {
+                  "example": "any"
+                },
+                "port_id": {
+                  "example": "any"
+                },
+                "connection_str": {
+                  "example": "any"
+                },
+                "team_name": {
+                  "example": "any"
+                },
+                "team_poc": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}

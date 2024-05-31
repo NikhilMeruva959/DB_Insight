@@ -235,6 +235,11 @@ app.post("/add-config-db-info", async (req, res) => {
   }
 });
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger-output.json");
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
