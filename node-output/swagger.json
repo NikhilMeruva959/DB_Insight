@@ -1,3 +1,522 @@
 {
-  "swagger" : "2.0"
+  "openapi" : "3.0.0",
+  "info" : {
+    "description" : "There are over 5000 databases in an org across the globe. Creating an Application for the DBA team to automate some of the routine tasks by providing self service features like - creating user id, data refresh, create db requests.\n\nThe application will also store database related details in one centralized app to help DBA Team to catalog all database info in the centralized app and use it for backup audits, user access audit and much more.\n",
+    "version" : "1.0.0",
+    "title" : "Database Insight",
+    "termsOfService" : "http://swagger.io/terms/"
+  },
+  "servers" : [ {
+    "description" : "SwaggerHub API Auto Mocking",
+    "url" : "https://virtserver.swaggerhub.com/NIKMERUVA1/data-insight/1.0.0"
+  } ],
+  "tags" : [ {
+    "name" : "database",
+    "description" : "Operations about database",
+    "externalDocs" : {
+      "description" : "Find out more about our store",
+      "url" : "http://swagger.io"
+    }
+  } ],
+  "paths" : {
+    "/get-db-names" : {
+      "get" : {
+        "tags" : [ "database" ],
+        "summary" : "Get all database names",
+        "operationId" : "getDbNames",
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "db_name" : {
+                        "type" : "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-schema-number" : {
+      "get" : {
+        "tags" : [ "database" ],
+        "summary" : "Get the number of schemas",
+        "operationId" : "getSchemaNumber",
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "schemaRowCount" : {
+                      "type" : "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-schema-names" : {
+      "get" : {
+        "tags" : [ "database" ],
+        "summary" : "Get all schema names",
+        "operationId" : "getSchemaNames",
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "schemaNameArray" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "properties" : {
+                          "schema_name" : {
+                            "type" : "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-config-db-info/{dbName}" : {
+      "get" : {
+        "tags" : [ "database" ],
+        "summary" : "Get config DB info",
+        "operationId" : "getConfigDbInfo",
+        "parameters" : [ {
+          "name" : "dbName",
+          "in" : "path",
+          "description" : "Name of the database",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "configDbInfoArray" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/get-config-db-info-insight/{dbName}" : {
+      "get" : {
+        "tags" : [ "database" ],
+        "summary" : "Get config DB info insight",
+        "operationId" : "getConfigDbInfoInsight",
+        "parameters" : [ {
+          "name" : "dbName",
+          "in" : "path",
+          "description" : "Name of the database",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "configInfoDbInfoArray" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tables/{connectionString}/run-query" : {
+      "post" : {
+        "tags" : [ "database" ],
+        "summary" : "Run a SQL query",
+        "operationId" : "runQuery",
+        "parameters" : [ {
+          "name" : "connectionString",
+          "in" : "path",
+          "description" : "Database connection string",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "SQL query to run",
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "sql_query" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "tableData" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Unsupported database type"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/add-config-db-info" : {
+      "post" : {
+        "tags" : [ "database" ],
+        "summary" : "Add a new config DB info",
+        "operationId" : "addConfigDbInfo",
+        "requestBody" : {
+          "description" : "Config DB info to add",
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "db_name" : {
+                    "type" : "string"
+                  },
+                  "db_type" : {
+                    "type" : "string"
+                  },
+                  "enviornment" : {
+                    "type" : "string"
+                  },
+                  "db_user_id" : {
+                    "type" : "string"
+                  },
+                  "db_password" : {
+                    "type" : "string"
+                  },
+                  "host_id" : {
+                    "type" : "string"
+                  },
+                  "port_id" : {
+                    "type" : "string"
+                  },
+                  "connection_str" : {
+                    "type" : "string"
+                  },
+                  "team_name" : {
+                    "type" : "string"
+                  },
+                  "team_poc" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Database configuration added successfully"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Order" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "petId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "shipDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "Order Status",
+            "enum" : [ "placed", "approved", "delivered" ]
+          },
+          "complete" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        },
+        "xml" : {
+          "name" : "Order"
+        }
+      },
+      "Category" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "xml" : {
+          "name" : "Category"
+        }
+      },
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "username" : {
+            "type" : "string"
+          },
+          "firstName" : {
+            "type" : "string"
+          },
+          "lastName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "userStatus" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "User Status"
+          }
+        },
+        "xml" : {
+          "name" : "User"
+        }
+      },
+      "Tag" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "xml" : {
+          "name" : "Tag"
+        }
+      },
+      "Pet" : {
+        "type" : "object",
+        "required" : [ "name", "photoUrls" ],
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "category" : {
+            "$ref" : "#/components/schemas/Category"
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "doggie"
+          },
+          "photoUrls" : {
+            "type" : "array",
+            "xml" : {
+              "name" : "photoUrl",
+              "wrapped" : true
+            },
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "tags" : {
+            "type" : "array",
+            "xml" : {
+              "name" : "tag",
+              "wrapped" : true
+            },
+            "items" : {
+              "$ref" : "#/components/schemas/Tag"
+            }
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "pet status in the store",
+            "enum" : [ "available", "pending", "sold" ]
+          }
+        },
+        "xml" : {
+          "name" : "Pet"
+        }
+      },
+      "ApiResponse" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "requestBodies" : {
+      "Pet" : {
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/Pet"
+            }
+          },
+          "application/xml" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/Pet"
+            }
+          }
+        },
+        "description" : "Pet object that needs to be added to the store",
+        "required" : true
+      },
+      "UserArray" : {
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "description" : "List of user object",
+        "required" : true
+      }
+    },
+    "securitySchemes" : {
+      "petstore_auth" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "http://petstore.swagger.io/oauth/dialog",
+            "scopes" : {
+              "write:pets" : "modify pets in your account",
+              "read:pets" : "read your pets"
+            }
+          }
+        }
+      },
+      "api_key" : {
+        "type" : "apiKey",
+        "name" : "api_key",
+        "in" : "header"
+      }
+    }
+  }
 }
