@@ -54,51 +54,39 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-// const filter = createFilterOptions();
-
 export default function ButtonAppBar() {
   const [value, setValue] = useState(null);
 
   return (
-    <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            ></IconButton>
-            <img src={LogoImage} alt="Logo" width="75" height="75" />
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                flexGrow: 1,
-                display: { xs: "none", sm: "flex" },
-                marginLeft: "15px",
-                // justifyContent: "center", // Center the title text
-              }}
-            >
-              Database Insight
-            </Typography>
-            {/* <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Database Name/Atlas"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search> */}
-            <Autocomplete />
-            <Button color="inherit">Nikhil M.</Button>
-          </Toolbar>
-        </AppBar>
-      </Box>
-    </>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static" sx={{ backgroundColor: "#FF6600" }}>
+        <Toolbar>
+          <img
+            src={LogoImage}
+            alt="Logo"
+            width="75"
+            height="75"
+            style={{ marginRight: "15px" }}
+          />
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              flexGrow: 1,
+              display: { xs: "none", sm: "flex" },
+              marginLeft: "15px",
+            }}
+          >
+            Fiserv. Database Insight
+          </Typography>
+          <Autocomplete
+            value={value}
+            onChange={(event, newValue) => setValue(newValue)}
+          />
+          <Button color="inherit">Nikhil M.</Button>
+        </Toolbar>
+      </AppBar>
+    </Box>
   );
 }

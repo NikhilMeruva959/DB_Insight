@@ -35,13 +35,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function DisplaySubTable({ confId }) {
-  const castedConfId = Number(confId);
+  const db_id = useSelector(selectSubDBId);
+
+  const castedConfId = Number(db_id);
 
   const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const subStr = useSelector(selectSubDBInfo);
   const dbVar = useSelector(selectDbName);
-  const db_id = useSelector(selectSubDBId);
   const [configDbInfo, setConfigDbInfo] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
 

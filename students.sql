@@ -33,3 +33,12 @@ CREATE USER 'root'@'localhost' IDENTIFIED BY 'Verisk67';
 GRANT ALL PRIVILEGES ON students.* TO 'root'@'localhost';
 FLUSH PRIVILEGES;
 
+SELECT user, host, plugin FROM mysql.user WHERE user = 'root@localhost';
+
+SHOW PLUGINS;
+
+SELECT USER();
+
+UNINSTALL PLUGIN mysql_native_password;
+INSTALL PLUGIN mysql_native_password SONAME 'mysql_native_password.so';
+

@@ -92,6 +92,30 @@
         }
       }
     },
+    "/get-config-db-info-selector/{subDBName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "subDBName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/tables/{connectionString}/run-query": {
       "post": {
         "description": "",

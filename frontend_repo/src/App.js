@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import StatusBar from "./components/StatusBar";
 import DisplayTable from "./components/DisplayTable";
-
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { changeState } from "./state/db_name/DBSlice";
 import { selectDbName } from "./state/db_name/DBSlice";
 
 function App() {
@@ -11,34 +11,39 @@ function App() {
   const [schemaNames, setSchemaNames] = useState([]);
   const [schemaCount, setSchemaCount] = useState(0);
   const dbVar = useSelector(selectDbName);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    // Fetch the database name from the backend
-    fetch("http://localhost:3002/get-db-names")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("HERE 1");
-        console.log("Fetched db names", data); // Log the schema count
-        setDbNames(data);
-      })
-      .catch((error) => console.error("There was an error!", error));
-
-    fetch("http://localhost:3002/get-schema-number")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched schema count:", data); // Log the schema count
-        setSchemaCount(data.schemaRowCount); // Ensure this matches the property name in your response
-      })
-      .catch((error) => console.error("There was an error!", error));
-
-    fetch("http://localhost:3002/get-schema-names")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched schema names:", data); // Log the schema count
-        setSchemaNames(data.schemaNameArray); // Ensure this matches the property name in your response
-      })
-      .catch((error) => console.error("There was an error!", error));
+    dispatch(changeState({ db_name: "db_insight" }));
   }, []);
+
+  // useEffect(() => {
+  //   // Fetch the database name from the backend
+  //   fetch("http://localhost:3002/get-db-names")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("HERE 1");
+  //       console.log("Fetched db names", data); // Log the schema count
+  //       setDbNames(data);
+  //     })
+  //     .catch((error) => console.error("There was an error!", error));
+
+  //   fetch("http://localhost:3002/get-schema-number")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Fetched schema count:", data); // Log the schema count
+  //       setSchemaCount(data.schemaRowCount); // Ensure this matches the property name in your response
+  //     })
+  //     .catch((error) => console.error("There was an error!", error));
+
+  //   fetch("http://localhost:3002/get-schema-names")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Fetched schema names:", data); // Log the schema count
+  //       setSchemaNames(data.schemaNameArray); // Ensure this matches the property name in your response
+  //     })
+  //     .catch((error) => console.error("There was an error!", error));
+  // }, []);
   console.log(dbVar);
 
   return (
@@ -46,7 +51,7 @@ function App() {
       {/* <LoginPage /> */}
       <Navbar />
       <StatusBar />
-      {dbVar === "db_insight" && <DisplayTable />}
+      <DisplayTable />
       {/* <div>
         <p>DB Names: {}</p>
         <p>Schema Count: {schemaCount}</p>

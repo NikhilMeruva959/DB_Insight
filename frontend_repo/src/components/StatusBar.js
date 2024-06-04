@@ -18,11 +18,10 @@ export default function StatusBar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar sx={{ bgcolor: "green" }} position="static">
         <Toolbar sx={{ display: "flex" }}>
-          {dbVar !== "" && (
-            <Typography variant="h6" sx={{ marginRight: 1 }}>
-              {dbVar} /
-            </Typography>
-          )}
+          <Typography variant="h6" sx={{ marginRight: 1 }}>
+            db_insight /
+          </Typography>
+
           {subDBVar !== "" && (
             <Typography variant="h6">{subDBVar} /</Typography>
           )}

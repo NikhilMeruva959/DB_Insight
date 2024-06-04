@@ -48,14 +48,14 @@ export default function DisplayTable() {
 
   useEffect(() => {
     // Fetch the config_db_info from the backend for the specified dbName
-    fetch(`http://localhost:3002/get-config-db-info/${dbVar}`)
+    fetch(`http://localhost:3002/get-config-db-info/db_insight`)
       .then((response) => response.json())
       .then((data) => {
         // Assuming the data is an array of objects
         setConfigDbInfo(data.configDbInfoArray);
       })
       .catch((error) => console.error("There was an error!", error));
-  }, [dbVar]);
+  }, []);
 
   const handleDbNameClick = (row) => {
     dispatch(changeState({ sub_db_name: row.db_name }));

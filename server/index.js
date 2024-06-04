@@ -108,6 +108,38 @@ app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
   }
 });
 
+app.get("/get-config-db-info-selector/:subDBName", async (req, res) => {
+  const dbName = req.params.subDBName;
+
+  const pool = new PostgresPool({
+    user: "nikmeruva",
+    host: "localhost",
+    database: "db_insight", // Use the database name from the request parameter
+    password: process.env.PASSWORD,
+    port: process.env.PORT,
+  });
+
+  try {
+    const queryResult = await pool.query("SELECT * FROM config_db_info");
+    console.log("Config DB Info:", queryResult.rows);
+
+    const configDbInfoArray = queryResult.rows;
+    const dbInfo = configDbInfoArray.find((db) => db.db_name === dbName);
+
+    if (dbInfo) {
+      const { config_db_id, connection_str } = dbInfo;
+      res.json({ config_db_id, connection_str });
+    } else {
+      res.status(404).json({ error: "Database not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching config_db_info", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    pool.end(); // Close the pool after the query
+  }
+});
+
 app.post("/tables/:connectionString/run-query", async (req, res) => {
   const connectionString = decodeURIComponent(req.params.connectionString);
   const { sql_query } = req.body;
