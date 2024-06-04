@@ -123,7 +123,7 @@ export default function DisplayTable() {
   } else {
     return (
       <>
-        <DisplaySubTable confId={confId} />
+        <DisplaySubTable />
       </>
     );
   }

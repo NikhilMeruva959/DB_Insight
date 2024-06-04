@@ -43,6 +43,17 @@ export default function FreeSoloCreateOptionDialog() {
       .catch((error) => console.error("There was an error!", error));
   }, [subDBVar]);
 
+  useEffect(() => {
+    fetch(`http://localhost:3002/get-config-db-info-selector/${subDBVar}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Filter and set only the db_names
+        dispatch(changeInfoState({ sub_db_info: data.connection_str }));
+        dispatch(changeIdState({ sub_db_id: data.config_db_id }));
+      })
+      .catch((error) => console.error("There was an error!", error));
+  }, [subDBVar]);
+
   return (
     <>
       <Autocomplete
