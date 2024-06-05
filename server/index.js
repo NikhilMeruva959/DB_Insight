@@ -3,6 +3,13 @@ const { Pool: PostgresPool } = require("pg");
 const cors = require("cors");
 const mysql = require("mysql2");
 const url = require("url");
+const AWS = require("aws-sdk");
+const {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+  CreateSecretCommand,
+  DescribeSecretCommand,
+} = require("@aws-sdk/client-secrets-manager");
 
 const app = express();
 const port = 3002;
@@ -10,12 +17,89 @@ const port = 3002;
 app.use(express.json());
 app.use(cors());
 
+const secret_name = "base_cred";
+let base_cred_pass;
+
+const client = new SecretsManagerClient({
+  region: "us-east-1",
+});
+
+async function getSecret(secretName) {
+  let response;
+
+  try {
+    response = await client.send(
+      new GetSecretValueCommand({
+        SecretId: secretName,
+        VersionStage: "AWSCURRENT",
+      })
+    );
+  } catch (error) {
+    console.error(`Error retrieving secret: ${error}`);
+    throw error;
+  }
+
+  return response.SecretString;
+}
+
+async function createSecret(secretName, secretValue) {
+  try {
+    await client.send(
+      new CreateSecretCommand({
+        Name: secretName,
+        SecretString: JSON.stringify(secretValue),
+      })
+    );
+  } catch (error) {
+    console.error(`Error creating secret: ${error}`);
+    throw error;
+  }
+}
+
+async function secretExists(secretName) {
+  try {
+    await client.send(
+      new DescribeSecretCommand({
+        SecretId: secretName,
+      })
+    );
+    return true;
+  } catch (error) {
+    if (error.name === "ResourceNotFoundException") {
+      return false;
+    } else {
+      console.error(`Error checking secret existence: ${error}`);
+      throw error;
+    }
+  }
+}
+
+async function storeDbPasswords(configDbInfoArray) {
+  for (const dbInfo of configDbInfoArray) {
+    const secretName = `db_password_${dbInfo.db_name}`;
+    const secretValue = { password: dbInfo.db_password };
+
+    if (!(await secretExists(secretName))) {
+      await createSecret(secretName, secretValue);
+    }
+  }
+}
+
+getSecret(secret_name)
+  .then((secret) => {
+    console.log("Secret:", secret);
+    base_cred_pass = secret;
+  })
+  .catch((error) => {
+    console.error("Error retrieving secret:", error);
+  });
+
 const postgresPool = new PostgresPool({
   user: "nikmeruva",
   host: "localhost",
   database: "db_insight",
-  password: process.env.PASSWORD,
-  port: process.env.PORT,
+  password: base_cred_pass,
+  port: 5432,
 });
 
 app.get("/get-db-names", async (req, res) => {
@@ -27,7 +111,7 @@ app.get("/get-db-names", async (req, res) => {
     const dbNames = queryResult.rows.map((row) => ({ db_name: row.datname }));
     res.json(dbNames); // Sends an array of objects
   } catch (error) {
-    console.error("Error fetching database names", error);
+    conso.error("Error fetching database names", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -37,11 +121,11 @@ app.get("/get-schema-number", async (req, res) => {
     const queryResult = await postgresPool.query(
       "SELECT schema_name FROM information_schema.schemata"
     );
-    console.log("Schema names:", queryResult.rowCount);
+    //console.log("Schema names:", queryResult.rowCount);
     const schemaRowCount = queryResult.rowCount;
     res.json({ schemaRowCount });
   } catch (error) {
-    console.error("Error fetching database name", error);
+    conso.error("Error fetching database name", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -51,11 +135,11 @@ app.get("/get-schema-names", async (req, res) => {
     const queryResult = await postgresPool.query(
       "SELECT schema_name FROM information_schema.schemata"
     );
-    console.log("Schema names:", queryResult.rows);
+    //console.log("Schema names:", queryResult.rows);
     const schemaNameArray = queryResult.rows;
     res.json({ schemaNameArray });
   } catch (error) {
-    console.error("Error fetching database name", error);
+    conso.error("Error fetching database name", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -66,21 +150,24 @@ app.get("/get-config-db-info/:dbName", async (req, res) => {
   const pool = new PostgresPool({
     user: "nikmeruva",
     host: "localhost",
-    database: dbName, // Use the database name from the request parameter
-    password: process.env.PASSWORD,
-    port: process.env.PORT,
+    database: dbName,
+    password: base_cred_pass,
+    port: 5432,
   });
 
   try {
     const queryResult = await pool.query("SELECT * FROM config_db_info");
-    console.log("Config DB Info:", queryResult.rows);
     const configDbInfoArray = queryResult.rows;
+
+    // Store DB passwords dynamically in AWS Secrets Manager
+    await storeDbPasswords(configDbInfoArray);
+
     res.json({ configDbInfoArray });
   } catch (error) {
     console.error("Error fetching config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    pool.end(); // Close the pool after the query
+    pool.end();
   }
 });
 
@@ -91,17 +178,17 @@ app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
     user: "nikmeruva",
     host: "localhost",
     database: dbName, // Use the database name from the request parameter
-    password: process.env.PASSWORD,
+    password: base_cred_pass,
     port: process.env.PORT,
   });
 
   try {
     const queryResult = await pool.query("SELECT * FROM conf_db_query");
-    console.log("Config Info DB Info:", queryResult.rows);
+    //console.log("Config Info DB Info:", queryResult.rows);
     const configInfoDbInfoArray = queryResult.rows;
     res.json({ configInfoDbInfoArray });
   } catch (error) {
-    console.error("Error fetching conf_db_query", error);
+    conso.error("Error fetching conf_db_query", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
     pool.end(); // Close the pool after the query
@@ -115,13 +202,13 @@ app.get("/get-config-db-info-selector/:subDBName", async (req, res) => {
     user: "nikmeruva",
     host: "localhost",
     database: "db_insight", // Use the database name from the request parameter
-    password: process.env.PASSWORD,
+    password: base_cred_pass,
     port: process.env.PORT,
   });
 
   try {
     const queryResult = await pool.query("SELECT * FROM config_db_info");
-    console.log("Config DB Info:", queryResult.rows);
+    //console.log("Config DB Info:", queryResult.rows);
 
     const configDbInfoArray = queryResult.rows;
     const dbInfo = configDbInfoArray.find((db) => db.db_name === dbName);
@@ -133,7 +220,7 @@ app.get("/get-config-db-info-selector/:subDBName", async (req, res) => {
       res.status(404).json({ error: "Database not found" });
     }
   } catch (error) {
-    console.error("Error fetching config_db_info", error);
+    conso.error("Error fetching config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
     pool.end(); // Close the pool after the query
@@ -144,7 +231,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
   const connectionString = decodeURIComponent(req.params.connectionString);
   const { sql_query } = req.body;
 
-  console.log("Received SQL Query:", sql_query); // Debug log
+  //console.log("Received SQL Query:", sql_query); // Debug log
 
   // Determine the database type from the connection string
   const parsedUrl = new url.URL(connectionString);
@@ -160,26 +247,26 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
       database: parsedUrl.pathname.slice(1), // Remove leading slash
     };
 
-    console.log(dbConfig);
+    //console.log(dbConfig);
 
     const pool = mysql.createPool(dbConfig);
 
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("Error connecting to the MySQL database:", err);
+        conso.error("Error connecting to the MySQL database:", err);
         return res.status(500).json({
           error: "Error connecting to the database",
           details: err.message,
         });
       } else {
-        console.log("Connected to the MySQL database");
+        //console.log("Connected to the MySQL database");
         connection.release();
       }
     });
 
     pool.query(sql_query, (error, results) => {
       if (error) {
-        console.error("Error executing query", error);
+        conso.error("Error executing query", error);
         return res
           .status(500)
           .json({ error: "Internal Server Error", details: error.message });
@@ -198,7 +285,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
         const result = await client.query(sql_query);
         res.json({ tableData: result.rows });
       } catch (queryError) {
-        console.error("Error executing query", queryError);
+        conso.error("Error executing query", queryError);
         res.status(500).json({
           error: "Internal Server Error",
           details: queryError.message,
@@ -207,7 +294,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
         client.release();
       }
     } catch (connectionError) {
-      console.error(
+      conso.error(
         "Error connecting to the PostgreSQL database:",
         connectionError
       );
@@ -224,7 +311,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
 });
 
 app.post("/add-config-db-info", async (req, res) => {
-  console.log("JJJJ2");
+  //console.log("JJJJ2");
   const {
     db_name,
     db_type,
@@ -237,7 +324,7 @@ app.post("/add-config-db-info", async (req, res) => {
     team_name,
     team_poc,
   } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
 
   const query = `
     INSERT INTO public.config_db_info (
@@ -262,7 +349,7 @@ app.post("/add-config-db-info", async (req, res) => {
       .status(201)
       .json({ message: "Database configuration added successfully" });
   } catch (error) {
-    console.error("Error adding config_db_info", error);
+    conso.error("Error adding config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -273,5 +360,5 @@ const swaggerDocument = require("./swagger-output.json");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  //console.log(`Server running on port ${port}`);
 });
