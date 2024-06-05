@@ -115,7 +115,7 @@ export default function DisplayTable() {
         </TableContainer>
 
         <h3>CRUD Operations</h3>
-        <CreateDBForm />
+        {/* <CreateDBForm /> */}
         <h5>Update DB</h5>
         <h5>Delete DB</h5>
       </>

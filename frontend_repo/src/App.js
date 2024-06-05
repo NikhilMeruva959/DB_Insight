@@ -5,6 +5,8 @@ import DisplayTable from "./components/DisplayTable";
 import { useDispatch, useSelector } from "react-redux";
 import { changeState } from "./state/db_name/DBSlice";
 import { selectDbName } from "./state/db_name/DBSlice";
+import Footer from "./components/Footer";
+import { Box, CssBaseline } from "@mui/material";
 
 function App() {
   const [dbNames, setDbNames] = useState([]);
@@ -15,7 +17,7 @@ function App() {
 
   useEffect(() => {
     dispatch(changeState({ db_name: "db_insight" }));
-  }, []);
+  }, [dispatch]);
 
   // useEffect(() => {
   //   // Fetch the database name from the backend
@@ -47,20 +49,21 @@ function App() {
   console.log(dbVar);
 
   return (
-    <>
-      {/* <LoginPage /> */}
-      <Navbar />
-      <StatusBar />
-      <DisplayTable />
-      {/* <div>
-        <p>DB Names: {}</p>
-        <p>Schema Count: {schemaCount}</p>
-        <p>Schema Names: </p>
-        {schemaNames.map((schema, index) => (
-          <li key={index}>{schema.schema_name}</li>
-        ))}
-      </div> */}
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <CssBaseline />
+      <Box component="main" sx={{ flexGrow: 1 }}>
+        <Navbar />
+        <StatusBar />
+        <DisplayTable />
+      </Box>
+      <Footer />
+    </Box>
   );
 }
 
