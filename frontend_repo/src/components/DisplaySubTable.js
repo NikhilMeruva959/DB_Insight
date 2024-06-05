@@ -76,8 +76,8 @@ export default function DisplaySubTable({ confId }) {
         if (data.error) {
           throw new Error(data.details);
         }
+        console.log(data);
         setTableData(data.tableData);
-        console.log(tableData);
         setExpandedRow(expandedRow === rowId ? null : rowId);
       })
       .catch((error) => {
@@ -87,12 +87,15 @@ export default function DisplaySubTable({ confId }) {
   };
 
   const getCountValue = (item) => {
-    if (item["COUNT(*)"] !== undefined) {
-      return item["COUNT(*)"];
+    if (item.number_of_employees !== undefined) {
+      return `Number of Employees: ${item.number_of_employees}`;
     } else if (item.count !== undefined) {
-      return parseInt(item.count, 10);
+      return `Count: ${item.count}`;
+    } else if (item["COUNT(*)"] !== undefined) {
+      return item["COUNT(*)"];
+    } else {
+      return "Unknown Data";
     }
-    return null;
   };
 
   const filteredConfigDbInfo = configDbInfo.filter(

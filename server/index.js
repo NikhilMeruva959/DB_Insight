@@ -80,6 +80,7 @@ async function storeDbPasswords(configDbInfoArray) {
     const secretName = `db_password_${dbInfo.db_name}`;
     const secretValue = { password: dbInfo.db_password };
 
+    //this is why there isn't duplicate secrets
     if (!(await secretExists(secretName))) {
       await createSecret(secretName, secretValue);
     }
