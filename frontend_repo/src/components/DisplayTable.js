@@ -15,7 +15,7 @@ import {
   changeInfoState,
   changeIdState,
 } from "../state/sub_db_name/SubDBSlice";
-import Link from "@mui/material/Link"; // Import Link component
+import Link from "@mui/material/Link";
 import { selectSubDBName } from "../state/sub_db_name/SubDBSlice";
 import DisplaySubTable from "./DisplaySubTable";
 
@@ -37,6 +37,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
+
+const maskSensitiveInfo = (str) => {
+  return str.replace(/./g, "*");
+};
 
 export default function DisplayTable() {
   const [configDbInfo, setConfigDbInfo] = useState([]);
@@ -102,10 +106,14 @@ export default function DisplayTable() {
                   <StyledTableCell>{row.db_type}</StyledTableCell>
                   <StyledTableCell>{row.enviornment}</StyledTableCell>
                   <StyledTableCell>{row.db_user_id}</StyledTableCell>
-                  <StyledTableCell>{row.db_password}</StyledTableCell>
+                  <StyledTableCell>
+                    {maskSensitiveInfo(row.db_password)}
+                  </StyledTableCell>
                   <StyledTableCell>{row.host_id}</StyledTableCell>
                   <StyledTableCell>{row.port_id}</StyledTableCell>
-                  <StyledTableCell>{row.connection_str}</StyledTableCell>
+                  <StyledTableCell>
+                    {maskSensitiveInfo(row.connection_str)}
+                  </StyledTableCell>
                   <StyledTableCell>{row.team_name}</StyledTableCell>
                   <StyledTableCell>{row.team_poc}</StyledTableCell>
                 </StyledTableRow>
