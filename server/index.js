@@ -2,6 +2,7 @@ const express = require("express");
 const { Pool: PostgresPool } = require("pg");
 const cors = require("cors");
 const mysql = require("mysql2");
+const sql = require("mssql");
 const url = require("url");
 const AWS = require("aws-sdk");
 const {
@@ -231,9 +232,6 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
   const connectionString = decodeURIComponent(req.params.connectionString);
   const { sql_query } = req.body;
 
-  //console.log("Received SQL Query:", sql_query); // Debug log
-
-  // Determine the database type from the connection string
   const parsedUrl = new url.URL(connectionString);
   const protocol = parsedUrl.protocol;
 
@@ -247,26 +245,23 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
       database: parsedUrl.pathname.slice(1), // Remove leading slash
     };
 
-    //console.log(dbConfig);
-
     const pool = mysql.createPool(dbConfig);
 
     pool.getConnection((err, connection) => {
       if (err) {
-        conso.error("Error connecting to the MySQL database:", err);
+        console.error("Error connecting to the MySQL database:", err);
         return res.status(500).json({
           error: "Error connecting to the database",
           details: err.message,
         });
       } else {
-        //console.log("Connected to the MySQL database");
         connection.release();
       }
     });
 
     pool.query(sql_query, (error, results) => {
       if (error) {
-        conso.error("Error executing query", error);
+        console.error("Error executing query", error);
         return res
           .status(500)
           .json({ error: "Internal Server Error", details: error.message });
@@ -285,7 +280,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
         const result = await client.query(sql_query);
         res.json({ tableData: result.rows });
       } catch (queryError) {
-        conso.error("Error executing query", queryError);
+        console.error("Error executing query", queryError);
         res.status(500).json({
           error: "Internal Server Error",
           details: queryError.message,
@@ -294,7 +289,7 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
         client.release();
       }
     } catch (connectionError) {
-      conso.error(
+      console.error(
         "Error connecting to the PostgreSQL database:",
         connectionError
       );
@@ -304,6 +299,35 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
       });
     } finally {
       pool.end(); // Close the pool after the query
+    }
+  } else if (protocol.startsWith("sqlserver")) {
+    // SQL Server connection
+    const dbConfig = {
+      user: parsedUrl.username,
+      password: parsedUrl.password,
+      server: parsedUrl.hostname,
+      port: parseInt(parsedUrl.port, 10),
+      database: parsedUrl.pathname.slice(1), // Remove leading slash
+      options: {
+        encrypt: true, // Use encryption
+        trustServerCertificate: true, // Trust the self-signed certificate
+      },
+    };
+
+    console.log(dbConfig);
+
+    try {
+      await sql.connect(dbConfig);
+      const result = await sql.query(sql_query);
+      res.json({ tableData: result.recordset });
+    } catch (err) {
+      console.error("Error executing query", err);
+      res.status(500).json({
+        error: "Internal Server Error",
+        details: err.message,
+      });
+    } finally {
+      sql.close();
     }
   } else {
     res.status(400).json({ error: "Unsupported database type" });
