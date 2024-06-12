@@ -1,11 +1,21 @@
-import React, { useState } from "react";
-import { TextField, Button, Paper, Container, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  TextField,
+  Button,
+  Paper,
+  Container,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 
 const CreateDBForm = () => {
   const [formData, setFormData] = useState({
     db_name: "",
     db_type: "",
-    enviornment: "",
+    environment: "",
     db_user_id: "",
     db_password: "",
     host_id: "",
@@ -14,13 +24,50 @@ const CreateDBForm = () => {
     team_name: "",
     team_poc: "",
   });
-  console.log(formData);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  useEffect(() => {
+    generateConnectionString();
+  }, [
+    formData.db_name,
+    formData.db_type,
+    formData.db_user_id,
+    formData.db_password,
+    formData.host_id,
+    formData.port_id,
+  ]);
+
+  const generateConnectionString = () => {
+    const { db_type, db_user_id, db_password, host_id, port_id, db_name } =
+      formData;
+
+    let connectionString = "";
+
+    switch (db_type) {
+      case "mysql":
+        connectionString = `mysql://${db_user_id}:${db_password}@${host_id}:${port_id}/${db_name}`;
+        break;
+      case "postgres":
+        connectionString = `postgres://${db_user_id}:${db_password}@${host_id}:${port_id}/${db_name}`;
+        break;
+      case "mssql":
+        connectionString = `sqlserver://${db_user_id}:${db_password}@${host_id}:${port_id}/${db_name}`;
+        break;
+      default:
+        connectionString = "";
+        break;
+    }
+
+    setFormData((prevState) => ({
+      ...prevState,
+      connection_str: connectionString,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -39,7 +86,7 @@ const CreateDBForm = () => {
         setFormData({
           db_name: "",
           db_type: "",
-          enviornment: "",
+          environment: "",
           db_user_id: "",
           db_password: "",
           host_id: "",
@@ -52,10 +99,8 @@ const CreateDBForm = () => {
       .catch((error) => console.error("There was an error!", error));
   };
 
-  console.log(formData);
-
   return (
-    <Container>
+    <Container sx={{ marginTop: "10px" }}>
       <Paper elevation={3} style={{ padding: 20 }}>
         <Typography variant="h6" gutterBottom>
           Add New Database Configuration
@@ -69,18 +114,22 @@ const CreateDBForm = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
-            label="Database Type"
-            name="db_type"
-            value={formData.db_type}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Database Type</InputLabel>
+            <Select
+              name="db_type"
+              value={formData.db_type}
+              onChange={handleChange}
+            >
+              <MenuItem value="postgres">Postgres</MenuItem>
+              <MenuItem value="mysql">MySQL</MenuItem>
+              <MenuItem value="mssql">MSSQL</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             label="Environment"
-            name="enviornment"
-            value={formData.enviornment}
+            name="environment"
+            value={formData.environment}
             onChange={handleChange}
             fullWidth
             margin="normal"
@@ -125,6 +174,7 @@ const CreateDBForm = () => {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             label="Team Name"

@@ -11,9 +11,11 @@ import { useSelector } from "react-redux";
 import {
   selectSubDBInfo,
   selectSubDBId,
+  selectSubDBName,
 } from "../state/sub_db_name/SubDBSlice";
 import { selectDbName } from "../state/db_name/DBSlice";
 import { Button } from "@mui/material";
+import CreateDBForm from "./CreateDBForm";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -43,6 +45,7 @@ export default function DisplaySubTable({ confId }) {
   const [error, setError] = useState(null);
   const subStr = useSelector(selectSubDBInfo);
   const dbVar = useSelector(selectDbName);
+  const subDbName = useSelector(selectSubDBName);
   const [configDbInfo, setConfigDbInfo] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
 
@@ -53,6 +56,7 @@ export default function DisplaySubTable({ confId }) {
       .then((data) => {
         // Assuming the data is an array of objects
         setConfigDbInfo(data.configInfoDbInfoArray);
+        console.log("LLL");
       })
       .catch((error) => console.error("There was an error!", error));
   }, [subStr]);
@@ -102,53 +106,63 @@ export default function DisplaySubTable({ confId }) {
     (row) => row.config_db_id === castedConfId
   );
 
-  return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Config Query ID</StyledTableCell>
-            <StyledTableCell>Menu Action</StyledTableCell>
-            <StyledTableCell>Menu Description</StyledTableCell>
-            <StyledTableCell>SQL Query</StyledTableCell>
-            <StyledTableCell>Config DB ID</StyledTableCell>
-            <StyledTableCell>Run Query</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredConfigDbInfo.map((row) => (
-            <React.Fragment key={row.config_query_id}>
-              <StyledTableRow>
-                <StyledTableCell>{row.config_query_id}</StyledTableCell>
-                <StyledTableCell>{row.menu_action}</StyledTableCell>
-                <StyledTableCell>{row.menu_desc}</StyledTableCell>
-                <StyledTableCell>{row.sql_query}</StyledTableCell>
-                <StyledTableCell>{row.config_db_id}</StyledTableCell>
-                <StyledTableCell>
-                  <Button
-                    onClick={() =>
-                      handleRunQueryClick(row.config_query_id, row.sql_query)
-                    }
-                  >
-                    Run Query
-                  </Button>
-                </StyledTableCell>
-              </StyledTableRow>
-              {expandedRow === row.config_query_id && (
+  if (subDbName !== "Creating a New DB Form") {
+    return (
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 700 }} aria-label="customized table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Config Query ID</StyledTableCell>
+              <StyledTableCell>Menu Action</StyledTableCell>
+              <StyledTableCell>Menu Description</StyledTableCell>
+              <StyledTableCell>SQL Query</StyledTableCell>
+              <StyledTableCell>Config DB ID</StyledTableCell>
+              <StyledTableCell>Run Query</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredConfigDbInfo.map((row) => (
+              <React.Fragment key={row.config_query_id}>
                 <StyledTableRow>
-                  <TableBody>
-                    {tableData.map((item, index) => (
-                      <StyledTableRow key={index}>
-                        <StyledTableCell>{getCountValue(item)}</StyledTableCell>
-                      </StyledTableRow>
-                    ))}
-                  </TableBody>
+                  <StyledTableCell>{row.config_query_id}</StyledTableCell>
+                  <StyledTableCell>{row.menu_action}</StyledTableCell>
+                  <StyledTableCell>{row.menu_desc}</StyledTableCell>
+                  <StyledTableCell>{row.sql_query}</StyledTableCell>
+                  <StyledTableCell>{row.config_db_id}</StyledTableCell>
+                  <StyledTableCell>
+                    <Button
+                      onClick={() =>
+                        handleRunQueryClick(row.config_query_id, row.sql_query)
+                      }
+                    >
+                      Run Query
+                    </Button>
+                  </StyledTableCell>
                 </StyledTableRow>
-              )}
-            </React.Fragment>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+                {expandedRow === row.config_query_id && (
+                  <StyledTableRow>
+                    <TableBody>
+                      {tableData.map((item, index) => (
+                        <StyledTableRow key={index}>
+                          <StyledTableCell>
+                            {getCountValue(item)}
+                          </StyledTableCell>
+                        </StyledTableRow>
+                      ))}
+                    </TableBody>
+                  </StyledTableRow>
+                )}
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  } else {
+    return (
+      <>
+        <CreateDBForm />
+      </>
+    );
+  }
 }

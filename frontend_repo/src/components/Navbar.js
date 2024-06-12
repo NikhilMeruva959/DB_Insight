@@ -80,10 +80,10 @@ export default function ButtonAppBar() {
           >
             Fiserv. Database Insight
           </Typography>
-          <Autocomplete
+          {/* <Autocomplete
             value={value}
             onChange={(event, newValue) => setValue(newValue)}
-          />
+          /> */}
           <Button color="inherit">Nikhil M.</Button>
         </Toolbar>
       </AppBar>

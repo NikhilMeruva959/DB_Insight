@@ -61,11 +61,30 @@ export default function DisplayTable() {
       .catch((error) => console.error("There was an error!", error));
   }, []);
 
+  useEffect(() => {
+    // Fetch the config_db_info from the backend for the specified dbName
+    console.log("HERE");
+    console.log(subDBVar);
+
+    fetch(`http://localhost:3002/get-config-db-info-selector/${subDBVar}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Assuming the data is an array of objects
+        console.log("HERE");
+        console.log(data);
+
+        dispatch(changeInfoState({ sub_db_info: data.connection_str }));
+        dispatch(changeIdState({ sub_db_id: data.config_db_id }));
+      })
+      .catch((error) => console.error("There was an error!", error));
+  }, [subDBVar]);
+
   const handleDbNameClick = (row) => {
     dispatch(changeState({ sub_db_name: row.db_name }));
-    console.log(row.connection_str);
-    dispatch(changeInfoState({ sub_db_info: row.connection_str }));
-    dispatch(changeIdState({ sub_db_id: row.config_db_id }));
+    // console.log(row.connection_str);
+    // dispatch(changeInfoState({ sub_db_info: row.connection_str }));
+    // dispatch(changeIdState({ sub_db_id: row.config_db_id }));
+    console.log("hjh");
     setConfId(row.config_db_id);
     // setSelectedSubStateStr(row.connection_str);
   };
@@ -82,10 +101,8 @@ export default function DisplayTable() {
                 <StyledTableCell>DB Type</StyledTableCell>
                 <StyledTableCell>Environment</StyledTableCell>
                 <StyledTableCell>DB User ID</StyledTableCell>
-                <StyledTableCell>DB Password</StyledTableCell>
                 <StyledTableCell>Host ID</StyledTableCell>
                 <StyledTableCell>Port ID</StyledTableCell>
-                <StyledTableCell>Connection String</StyledTableCell>
                 <StyledTableCell>Team Name</StyledTableCell>
                 <StyledTableCell>Team POC</StyledTableCell>
               </TableRow>
@@ -106,14 +123,10 @@ export default function DisplayTable() {
                   <StyledTableCell>{row.db_type}</StyledTableCell>
                   <StyledTableCell>{row.enviornment}</StyledTableCell>
                   <StyledTableCell>{row.db_user_id}</StyledTableCell>
-                  <StyledTableCell>
-                    {maskSensitiveInfo(row.db_password)}
-                  </StyledTableCell>
+
                   <StyledTableCell>{row.host_id}</StyledTableCell>
                   <StyledTableCell>{row.port_id}</StyledTableCell>
-                  <StyledTableCell>
-                    {maskSensitiveInfo(row.connection_str)}
-                  </StyledTableCell>
+
                   <StyledTableCell>{row.team_name}</StyledTableCell>
                   <StyledTableCell>{row.team_poc}</StyledTableCell>
                 </StyledTableRow>

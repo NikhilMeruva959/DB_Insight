@@ -8,6 +8,7 @@ import {
   changeInfoState,
   changeIdState,
 } from "../state/sub_db_name/SubDBSlice";
+import { changeLandingState } from "../state/app_state/Homepage";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function FreeSoloCreateOptionDialog() {
@@ -61,20 +62,29 @@ export default function FreeSoloCreateOptionDialog() {
         onChange={(event, newValue) => {
           // Check if newValue is a string and exists in the dbNames array
           if (typeof newValue === "string") {
+            console.log(newValue);
             const isExisting = dbNames.includes(newValue);
             if (isExisting) {
               // Handle as if selecting from the dropdown
               console.log(newValue); // Optionally log the value
               dispatch(changeState({ sub_db_name: newValue }));
+              dispatch(changeLandingState({ landingPage_state: 0 }));
+
+              //////////////////////////////////////
+              // dispatch(changeInfoState({ sub_db_info: row.connection_str }));
+              // dispatch(changeIdState({ sub_db_id: row.config_db_id }));
+              // setConfId(row.config_db_id);
+            } else {
+              // Create a new value from the user input
+              console.log(newValue.inputValue);
+              dispatch(changeState({ sub_db_name: "Creating a New DB Form" }));
+              dispatch(changeLandingState({ landingPage_state: 1 }));
             }
-          } else if (newValue && newValue.inputValue) {
-            // Create a new value from the user input
-            console.log(newValue.inputValue);
-            dispatch(changeState({ sub_db_name: "CREATE NEW DB" }));
-          } else {
-            // Handle selection from the dropdown directly
-            console.log(newValue);
-            dispatch(changeState(newValue));
+            // } else {
+            //   // Handle selection from the dropdown directly
+            //   console.log(newValue);
+            //   dispatch(changeState(newValue));
+            // }
           }
         }}
         filterOptions={(options, params) => {
@@ -85,6 +95,7 @@ export default function FreeSoloCreateOptionDialog() {
           const isExisting = options.includes(inputValue);
           if (inputValue !== "" && !isExisting) {
             filtered.push(`Add "${inputValue}"`);
+            console.log(inputValue);
           }
 
           return filtered;

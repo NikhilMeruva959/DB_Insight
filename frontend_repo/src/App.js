@@ -7,47 +7,37 @@ import { changeState } from "./state/db_name/DBSlice";
 import { selectDbName } from "./state/db_name/DBSlice";
 import Footer from "./components/Footer";
 import { Box, CssBaseline } from "@mui/material";
+import LandingPage from "./components/LandingPage";
+import { selectLandingPage } from "./state/app_state/Homepage";
+import CreateDBForm from "./components/CreateDBForm";
 
 function App() {
   const [dbNames, setDbNames] = useState([]);
   const [schemaNames, setSchemaNames] = useState([]);
   const [schemaCount, setSchemaCount] = useState(0);
   const dbVar = useSelector(selectDbName);
+  const landingPageVar = useSelector(selectLandingPage);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(changeState({ db_name: "db_insight" }));
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   // Fetch the database name from the backend
-  //   fetch("http://localhost:3002/get-db-names")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("HERE 1");
-  //       console.log("Fetched db names", data); // Log the schema count
-  //       setDbNames(data);
-  //     })
-  //     .catch((error) => console.error("There was an error!", error));
+  const renderContent = () => {
+    switch (landingPageVar) {
+      case "":
+        return <LandingPage />;
+      case 0:
+        return <DisplayTable />;
+      case 1:
+        return <CreateDBForm />;
+      default:
+        return <LandingPage />;
+    }
+  };
 
-  //   fetch("http://localhost:3002/get-schema-number")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("Fetched schema count:", data); // Log the schema count
-  //       setSchemaCount(data.schemaRowCount); // Ensure this matches the property name in your response
-  //     })
-  //     .catch((error) => console.error("There was an error!", error));
-
-  //   fetch("http://localhost:3002/get-schema-names")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("Fetched schema names:", data); // Log the schema count
-  //       setSchemaNames(data.schemaNameArray); // Ensure this matches the property name in your response
-  //     })
-  //     .catch((error) => console.error("There was an error!", error));
-  // }, []);
-  console.log(dbVar);
-
+  console.log();
   return (
     <Box
       sx={{
@@ -60,7 +50,7 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Navbar />
         <StatusBar />
-        <DisplayTable />
+        {renderContent()}
       </Box>
       <Footer />
     </Box>

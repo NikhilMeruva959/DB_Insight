@@ -40,7 +40,26 @@ async function getSecret(secretName) {
     throw error;
   }
 
-  return response.SecretString;
+  return JSON.parse(response.SecretString);
+}
+
+async function getConnectionString(secretName) {
+  let response;
+
+  try {
+    response = await client.send(
+      new GetSecretValueCommand({
+        SecretId: secretName,
+        VersionStage: "AWSCURRENT",
+      })
+    );
+  } catch (error) {
+    console.error(`Error retrieving secret: ${error}`);
+    throw error;
+  }
+
+  const secret = JSON.parse(response.SecretString);
+  return secret.connection_str;
 }
 
 async function createSecret(secretName, secretValue) {
@@ -78,9 +97,12 @@ async function secretExists(secretName) {
 async function storeDbPasswords(configDbInfoArray) {
   for (const dbInfo of configDbInfoArray) {
     const secretName = `db_password_${dbInfo.db_name}`;
-    const secretValue = { password: dbInfo.db_password };
+    const secretValue = {
+      password: dbInfo.db_password,
+      connection_str: dbInfo.connection_str,
+    };
 
-    //this is why there isn't duplicate secrets
+    // Ensure there aren't duplicate secrets
     if (!(await secretExists(secretName))) {
       await createSecret(secretName, secretValue);
     }
@@ -90,7 +112,7 @@ async function storeDbPasswords(configDbInfoArray) {
 getSecret(secret_name)
   .then((secret) => {
     console.log("Secret:", secret);
-    base_cred_pass = secret;
+    base_cred_pass = secret.password;
   })
   .catch((error) => {
     console.error("Error retrieving secret:", error);
@@ -102,48 +124,6 @@ const postgresPool = new PostgresPool({
   database: "db_insight",
   password: base_cred_pass,
   port: 5432,
-});
-
-app.get("/get-db-names", async (req, res) => {
-  try {
-    const queryResult = await postgresPool.query(
-      "SELECT datname FROM pg_database WHERE datistemplate = false;"
-    );
-    // Wrap each database name in an object with 'db_name' key
-    const dbNames = queryResult.rows.map((row) => ({ db_name: row.datname }));
-    res.json(dbNames); // Sends an array of objects
-  } catch (error) {
-    conso.error("Error fetching database names", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-app.get("/get-schema-number", async (req, res) => {
-  try {
-    const queryResult = await postgresPool.query(
-      "SELECT schema_name FROM information_schema.schemata"
-    );
-    //console.log("Schema names:", queryResult.rowCount);
-    const schemaRowCount = queryResult.rowCount;
-    res.json({ schemaRowCount });
-  } catch (error) {
-    conso.error("Error fetching database name", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-app.get("/get-schema-names", async (req, res) => {
-  try {
-    const queryResult = await postgresPool.query(
-      "SELECT schema_name FROM information_schema.schemata"
-    );
-    //console.log("Schema names:", queryResult.rows);
-    const schemaNameArray = queryResult.rows;
-    res.json({ schemaNameArray });
-  } catch (error) {
-    conso.error("Error fetching database name", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
 });
 
 app.get("/get-config-db-info/:dbName", async (req, res) => {
@@ -186,11 +166,10 @@ app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
 
   try {
     const queryResult = await pool.query("SELECT * FROM conf_db_query");
-    //console.log("Config Info DB Info:", queryResult.rows);
     const configInfoDbInfoArray = queryResult.rows;
     res.json({ configInfoDbInfoArray });
   } catch (error) {
-    conso.error("Error fetching conf_db_query", error);
+    console.error("Error fetching conf_db_query", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
     pool.end(); // Close the pool after the query
@@ -199,6 +178,7 @@ app.get("/get-config-db-info-insight/:dbName", async (req, res) => {
 
 app.get("/get-config-db-info-selector/:subDBName", async (req, res) => {
   const dbName = req.params.subDBName;
+  console.log(dbName);
 
   const pool = new PostgresPool({
     user: "nikmeruva",
@@ -210,19 +190,20 @@ app.get("/get-config-db-info-selector/:subDBName", async (req, res) => {
 
   try {
     const queryResult = await pool.query("SELECT * FROM config_db_info");
-    //console.log("Config DB Info:", queryResult.rows);
-
     const configDbInfoArray = queryResult.rows;
     const dbInfo = configDbInfoArray.find((db) => db.db_name === dbName);
 
     if (dbInfo) {
-      const { config_db_id, connection_str } = dbInfo;
+      const secretName = `db_password_${dbName}`;
+      const connection_str = await getConnectionString(secretName);
+      console.log(connection_str);
+      const { config_db_id } = dbInfo;
       res.json({ config_db_id, connection_str });
     } else {
       res.status(404).json({ error: "Database not found" });
     }
   } catch (error) {
-    conso.error("Error fetching config_db_info", error);
+    console.error("Error fetching config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
     pool.end(); // Close the pool after the query
@@ -336,7 +317,6 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
 });
 
 app.post("/add-config-db-info", async (req, res) => {
-  //console.log("JJJJ2");
   const {
     db_name,
     db_type,
@@ -349,13 +329,23 @@ app.post("/add-config-db-info", async (req, res) => {
     team_name,
     team_poc,
   } = req.body;
-  //console.log(req.body);
+
+  const secretName = `db_password_${db_name}`;
+  const secretValue = {
+    password: db_password,
+    connection_str: connection_str,
+  };
+
+  // Ensure there aren't duplicate secrets
+  if (!(await secretExists(secretName))) {
+    await createSecret(secretName, secretValue);
+  }
 
   const query = `
     INSERT INTO public.config_db_info (
-      db_name, db_type, enviornment, db_user_id, db_password, 
-      host_id, port_id, connection_str, team_name, team_poc
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+      db_name, db_type, enviornment, db_user_id,
+      host_id, port_id, team_name, team_poc
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
 
   try {
     await postgresPool.query(query, [
@@ -363,10 +353,8 @@ app.post("/add-config-db-info", async (req, res) => {
       db_type,
       enviornment,
       db_user_id,
-      db_password,
       host_id,
       port_id,
-      connection_str,
       team_name,
       team_poc,
     ]);
@@ -374,16 +362,17 @@ app.post("/add-config-db-info", async (req, res) => {
       .status(201)
       .json({ message: "Database configuration added successfully" });
   } catch (error) {
-    conso.error("Error adding config_db_info", error);
+    console.error("Error adding config_db_info", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger-output.json");
+const { createConnection } = require("net");
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
-  //console.log(`Server running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
