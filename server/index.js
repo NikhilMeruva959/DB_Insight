@@ -329,6 +329,7 @@ app.post("/add-config-db-info", async (req, res) => {
     team_name,
     team_poc,
   } = req.body;
+  console.log(req.body);
 
   const secretName = `db_password_${db_name}`;
   const secretValue = {
@@ -336,19 +337,32 @@ app.post("/add-config-db-info", async (req, res) => {
     connection_str: connection_str,
   };
 
-  // Ensure there aren't duplicate secrets
-  if (!(await secretExists(secretName))) {
-    await createSecret(secretName, secretValue);
-  }
-
-  const query = `
-    INSERT INTO public.config_db_info (
-      db_name, db_type, enviornment, db_user_id,
-      host_id, port_id, team_name, team_poc
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-
   try {
-    await postgresPool.query(query, [
+    // Ensure there aren't duplicate secrets
+    if (!(await secretExists(secretName))) {
+      await createSecret(secretName, secretValue);
+    }
+
+    // Create the new database
+    await postgresPool.query(`CREATE DATABASE ${db_name}`);
+
+    // Create a new pool for the newly created database
+    const newDbPool = new PostgresPool({
+      user: db_user_id,
+      host: host_id,
+      database: db_name,
+      password: db_password,
+      port: port_id,
+    });
+
+    // Insert the configuration into the config_db_info table
+    const query = `
+      INSERT INTO public.config_db_info (
+        db_name, db_type, enviornment, db_user_id,
+        host_id, port_id, team_name, team_poc
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+
+    await newDbPool.query(query, [
       db_name,
       db_type,
       enviornment,
@@ -358,6 +372,7 @@ app.post("/add-config-db-info", async (req, res) => {
       team_name,
       team_poc,
     ]);
+
     res
       .status(201)
       .json({ message: "Database configuration added successfully" });

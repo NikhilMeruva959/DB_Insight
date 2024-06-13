@@ -50,21 +50,15 @@ export default function DisplaySubTable({ confId }) {
   const [expandedRow, setExpandedRow] = useState(null);
 
   useEffect(() => {
-    // Fetch the config_db_info from the backend for the specified dbName
     fetch(`http://localhost:3002/get-config-db-info-insight/${dbVar}`)
       .then((response) => response.json())
       .then((data) => {
-        // Assuming the data is an array of objects
         setConfigDbInfo(data.configInfoDbInfoArray);
-        console.log("LLL");
       })
       .catch((error) => console.error("There was an error!", error));
   }, [subStr]);
 
   const handleRunQueryClick = (rowId, sql_query) => {
-    console.log(sql_query);
-    console.log(JSON.stringify({ sql_query }));
-
     fetch(
       `http://localhost:3002/tables/${encodeURIComponent(subStr)}/run-query`,
       {
@@ -80,7 +74,6 @@ export default function DisplaySubTable({ confId }) {
         if (data.error) {
           throw new Error(data.details);
         }
-        console.log(data);
         setTableData(data.tableData);
         setExpandedRow(expandedRow === rowId ? null : rowId);
       })
@@ -141,15 +134,21 @@ export default function DisplaySubTable({ confId }) {
                 </StyledTableRow>
                 {expandedRow === row.config_query_id && (
                   <StyledTableRow>
-                    <TableBody>
-                      {tableData.map((item, index) => (
-                        <StyledTableRow key={index}>
-                          <StyledTableCell>
-                            {getCountValue(item)}
-                          </StyledTableCell>
-                        </StyledTableRow>
-                      ))}
-                    </TableBody>
+                    <StyledTableCell colSpan={6}>
+                      <TableContainer component={Paper}>
+                        <Table>
+                          <TableBody>
+                            {tableData.map((item, index) => (
+                              <StyledTableRow key={index}>
+                                <StyledTableCell>
+                                  {getCountValue(item)}
+                                </StyledTableCell>
+                              </StyledTableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </StyledTableCell>
                   </StyledTableRow>
                 )}
               </React.Fragment>
@@ -159,10 +158,6 @@ export default function DisplaySubTable({ confId }) {
       </TableContainer>
     );
   } else {
-    return (
-      <>
-        <CreateDBForm />
-      </>
-    );
+    return <CreateDBForm />;
   }
 }
