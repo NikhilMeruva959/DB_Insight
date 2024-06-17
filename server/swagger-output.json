@@ -11,17 +11,9 @@
     "http"
   ],
   "paths": {
-    "/get-config-db-info/{dbName}": {
+    "/get-config-db-info": {
       "get": {
         "description": "",
-        "parameters": [
-          {
-            "name": "dbName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"

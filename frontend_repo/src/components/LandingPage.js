@@ -1,102 +1,84 @@
 import React from "react";
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  ButtonBase,
-} from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { Box, Button, Grid, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
 import { changeLandingState } from "../state/app_state/Homepage";
-import Autocomplete from "./Autocomplete";
 
-const cardData = [
-  {
-    title: "Want to see all the avaliable DB's?",
-    description: "Check all the DB's",
-  },
-  {
-    title: "Self Service Features",
-    description: "Step-by-step guide to help you get started with your DB's",
-  },
-  {
-    title: "Owner guide",
-    description: "Learn more about account owner permissions",
-  },
-  {
-    title: "App & Features",
-    description: "Discover how to use Database Insight",
-  },
-  {
-    title: "Discover One",
-    description: "All you need to know to start on a solid base.",
-  },
-];
+const services = {
+  Database: [
+    "Create Database, schema",
+    "Add a query to a DB",
+    "Data Refresh a DB",
+    "Scale resources - memory, storage",
+    "Stop Database",
+  ],
+  "DB User": [
+    "Create user_id",
+    "Revoke a user_id",
+    "View individual user profile/access",
+  ],
+  "Database Metrics": [
+    "List of Databases",
+    "Add/Change Database Query",
+    "List users and roles for a DB",
+  ],
+  Status: ["Last Successful Backup"],
+  Logs: [
+    "Check Logs",
+    "Alerts and Incident Trend",
+    "Database growth trend",
+    "Cost and sizing analysis",
+  ],
+};
 
 const LandingPage = () => {
   const dispatch = useDispatch();
+
   return (
-    <Container maxWidth="lg " sx={{ marginBottom: 4 }}>
-      <Box sx={{ textAlign: "center", marginTop: 4, marginBottom: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Search for you DB/Atlas Right Here!
-        </Typography>
-        <Box
-          component="form"
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Autocomplete />
-          <Button variant="contained" color="primary">
-            Search
-          </Button>
-        </Box>
-      </Box>
-      <Grid container spacing={4} justifyContent="center">
-        {cardData.map((card, index) => (
-          <Grid item key={index} xs={12} sm={6} md={4}>
-            <ButtonBase
-              sx={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                textAlign: "center",
-              }}
-              onClick={() =>
-                dispatch(changeLandingState({ landingPage_state: index }))
-              }
-            >
-              <Card
-                sx={{
-                  width: "100%",
-                  minHeight: 200,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  textAlign: "center",
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    {card.title}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {card.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </ButtonBase>
+    <Box
+      p={3}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      width="90%"
+      gap={4}
+      sx={{
+        margin: "0 auto", // centers the box horizontally
+        padding: "20px", // adds padding inside the box
+        background: "#FAF9F6",
+        marginTop: "15px",
+        marginBottom: "15px",
+      }}
+    >
+      <Typography variant="h4" gutterBottom>
+        Services by category
+      </Typography>
+      <Grid container spacing={2} justifyContent="center">
+        {Object.keys(services).map((category) => (
+          <Grid item xs={12} md={6} key={category}>
+            <Box mb={2}>
+              <Typography variant="h6">{category}</Typography>
+              {services[category].map((service, index) => (
+                <Button
+                  key={`${category}--${index}`}
+                  variant="outlined"
+                  size="small"
+                  sx={{ margin: "4px" }}
+                  onClick={() =>
+                    dispatch(
+                      changeLandingState({
+                        landingPage_state: `${category}-${index}`,
+                      })
+                    )
+                  }
+                >
+                  {service}
+                </Button>
+              ))}
+            </Box>
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

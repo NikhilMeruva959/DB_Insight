@@ -11,6 +11,7 @@ import LandingPage from "./components/LandingPage";
 import { selectLandingPage } from "./state/app_state/Homepage";
 import CreateDBForm from "./components/CreateDBForm";
 import SelfServicePage from "./components/SelfServicePage";
+import AddQueryToDB from "./components/AddQueryToDB";
 
 function App() {
   const [dbNames, setDbNames] = useState([]);
@@ -29,10 +30,12 @@ function App() {
     switch (landingPageVar) {
       case "":
         return <LandingPage />;
-      case 0:
+      case "Database Metrics-0":
         return <DisplayTable />;
-      case 1:
-        return <SelfServicePage />;
+      case "Database-0":
+        return <CreateDBForm />;
+      case "Database-1":
+        return <AddQueryToDB />;
       default:
         return <LandingPage />;
     }

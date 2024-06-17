@@ -82,39 +82,6 @@ const Footer = () => {
         >
           © 2024 Fiserv, Inc. or its affiliates.
         </Typography>
-        <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
-          <Link
-            href="https://yourwebsite.com/privacy-notice"
-            variant="body2"
-            color="inherit"
-          >
-            Privacy Notice
-          </Link>
-          {" | "}
-          <Link
-            href="https://yourwebsite.com/eea-privacy-notice"
-            variant="body2"
-            color="inherit"
-          >
-            EEA Resident Privacy Notice
-          </Link>
-          {" | "}
-          <Link
-            href="https://yourwebsite.com/terms-of-use"
-            variant="body2"
-            color="inherit"
-          >
-            Terms of Use
-          </Link>
-          {" | "}
-          <Link
-            href="https://yourwebsite.com/hr-privacy-notice"
-            variant="body2"
-            color="inherit"
-          >
-            HR Privacy Notice
-          </Link>
-        </Box>
       </Container>
     </Box>
   );

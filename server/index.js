@@ -118,21 +118,20 @@ getSecret(secret_name)
     console.error("Error retrieving secret:", error);
   });
 
-const postgresPool = new PostgresPool({
+const postgresPoolMain = new PostgresPool({
   user: "nikmeruva",
   host: "localhost",
-  database: "db_insight",
   password: base_cred_pass,
   port: 5432,
 });
 
-app.get("/get-config-db-info/:dbName", async (req, res) => {
+app.get("/get-config-db-info", async (req, res) => {
   const dbName = req.params.dbName;
 
   const pool = new PostgresPool({
     user: "nikmeruva",
     host: "localhost",
-    database: dbName,
+    database: "db_insight",
     password: base_cred_pass,
     port: 5432,
   });
@@ -316,6 +315,36 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
   }
 });
 
+app.post("/add-config-db-query", async (req, res) => {
+  const { config_db_id, menu_action, menu_desc, sql_query } = req.body;
+  console.log(req.body);
+
+  try {
+    const pool = new PostgresPool({
+      user: "nikmeruva",
+      host: "localhost",
+      database: "db_insight",
+      password: base_cred_pass,
+      port: 5432,
+    });
+
+    // Insert the configuration into the config_db_info table
+    const query = `
+      INSERT INTO public.conf_db_query (
+        menu_action, menu_desc, sql_query, config_db_id,
+      ) VALUES ($1, $2, $3, $4)`;
+
+    await pool.query(query, [menu_action, menu_desc, sql_query, config_db_id]);
+
+    res
+      .status(201)
+      .json({ message: "Database configuration added successfully" });
+  } catch (error) {
+    console.error("Error adding config_db_info", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.post("/add-config-db-info", async (req, res) => {
   const {
     db_name,
@@ -344,16 +373,24 @@ app.post("/add-config-db-info", async (req, res) => {
     }
 
     // Create the new database
-    await postgresPool.query(`CREATE DATABASE ${db_name}`);
+    await postgresPoolMain.query(`CREATE DATABASE ${db_name}`);
+
+    const pool = new PostgresPool({
+      user: "nikmeruva",
+      host: "localhost",
+      database: "db_insight",
+      password: base_cred_pass,
+      port: 5432,
+    });
 
     // Create a new pool for the newly created database
-    const newDbPool = new PostgresPool({
-      user: db_user_id,
-      host: host_id,
-      database: db_name,
-      password: db_password,
-      port: port_id,
-    });
+    // const newDbPool = new PostgresPool({
+    //   user: db_user_id,
+    //   host: host_id,
+    //   database: db_name,
+    //   password: db_password,
+    //   port: port_id,
+    // });
 
     // Insert the configuration into the config_db_info table
     const query = `
@@ -362,7 +399,7 @@ app.post("/add-config-db-info", async (req, res) => {
         host_id, port_id, team_name, team_poc
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
 
-    await newDbPool.query(query, [
+    await pool.query(query, [
       db_name,
       db_type,
       enviornment,
@@ -381,7 +418,6 @@ app.post("/add-config-db-info", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger-output.json");
 const { createConnection } = require("net");
