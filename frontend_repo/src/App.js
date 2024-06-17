@@ -10,6 +10,7 @@ import { Box, CssBaseline } from "@mui/material";
 import LandingPage from "./components/LandingPage";
 import { selectLandingPage } from "./state/app_state/Homepage";
 import CreateDBForm from "./components/CreateDBForm";
+import SelfServicePage from "./components/SelfServicePage";
 
 function App() {
   const [dbNames, setDbNames] = useState([]);
@@ -31,7 +32,7 @@ function App() {
       case 0:
         return <DisplayTable />;
       case 1:
-        return <CreateDBForm />;
+        return <SelfServicePage />;
       default:
         return <LandingPage />;
     }
