@@ -26,11 +26,11 @@ const AddQueryToDB = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    console.log(formData);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     fetch("http://localhost:3002/add-config-db-info", {
       method: "POST",
       headers: {
@@ -56,10 +56,6 @@ const AddQueryToDB = () => {
       .then((response) => response.json())
       .then((data) => {
         // Assuming the data is an array of objects
-        console.log(data.configDbInfoArray);
-        console.log(
-          data.configDbInfoArray.map((db) => [db.db_name, db.config_db_id])
-        );
         const tempArr = data.configDbInfoArray.map((db) => [
           db.db_name,
           db.config_db_id,
@@ -79,7 +75,7 @@ const AddQueryToDB = () => {
           <FormControl fullWidth margin="normal">
             <InputLabel>Database Name</InputLabel>
             <Select
-              name="db_name"
+              name="config_db_id"
               value={formData.config_db_id}
               onChange={handleChange}
             >
@@ -92,7 +88,7 @@ const AddQueryToDB = () => {
           </FormControl>
           <TextField
             label="Menu Action"
-            name="Menu Action"
+            name="menu_action"
             value={formData.menu_action}
             onChange={handleChange}
             fullWidth
@@ -100,7 +96,7 @@ const AddQueryToDB = () => {
           />
           <TextField
             label="Menu Desc"
-            name="Menu Desc"
+            name="menu_desc"
             value={formData.menu_desc}
             onChange={handleChange}
             fullWidth
@@ -108,7 +104,7 @@ const AddQueryToDB = () => {
           />
           <TextField
             label="SQL Query"
-            name="SQL Query"
+            name="sql_query"
             value={formData.sql_query}
             onChange={handleChange}
             fullWidth
