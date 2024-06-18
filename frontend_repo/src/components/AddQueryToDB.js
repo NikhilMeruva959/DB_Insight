@@ -31,7 +31,7 @@ const AddQueryToDB = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formData);
-    fetch("http://localhost:3002/add-config-db-info", {
+    fetch("http://localhost:3002/add-config-db-query", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

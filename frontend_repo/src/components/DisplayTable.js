@@ -52,7 +52,7 @@ export default function DisplayTable() {
 
   useEffect(() => {
     // Fetch the config_db_info from the backend for the specified dbName
-    fetch(`http://localhost:3002/get-config-db-info/db_insight`)
+    fetch(`http://localhost:3002/get-config-db-info`)
       .then((response) => response.json())
       .then((data) => {
         // Assuming the data is an array of objects

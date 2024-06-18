@@ -317,6 +317,8 @@ app.post("/tables/:connectionString/run-query", async (req, res) => {
 
 app.post("/add-config-db-query", async (req, res) => {
   const { config_db_id, menu_action, menu_desc, sql_query } = req.body;
+  const numericConfigDbId = Number(config_db_id);
+
   console.log(req.body);
 
   try {
@@ -331,10 +333,15 @@ app.post("/add-config-db-query", async (req, res) => {
     // Insert the configuration into the config_db_info table
     const query = `
       INSERT INTO public.conf_db_query (
-        menu_action, menu_desc, sql_query, config_db_id,
+        menu_action, menu_desc, sql_query, config_db_id
       ) VALUES ($1, $2, $3, $4)`;
 
-    await pool.query(query, [menu_action, menu_desc, sql_query, config_db_id]);
+    await pool.query(query, [
+      menu_action,
+      menu_desc,
+      sql_query,
+      numericConfigDbId,
+    ]);
 
     res
       .status(201)

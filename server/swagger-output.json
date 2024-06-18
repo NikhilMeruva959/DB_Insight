@@ -105,6 +105,42 @@
         }
       }
     },
+    "/add-config-db-query": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "config_db_id": {
+                  "example": "any"
+                },
+                "menu_action": {
+                  "example": "any"
+                },
+                "menu_desc": {
+                  "example": "any"
+                },
+                "sql_query": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/add-config-db-info": {
       "post": {
         "description": "",
